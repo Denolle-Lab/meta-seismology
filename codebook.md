@@ -3,10 +3,10 @@
 Terms were assigned by a large language model from each paper's title and
 abstract, in two passes:
 
-1. Screening and extraction, on all 9,438 candidates: inclusion, targets,
+1. Screening and extraction, on all 39,446 candidates: inclusion, targets,
    source types, observation networks, and method uses with their
    magnitudes, distances, and data types.
-2. Study design, on the 5,272 included papers: primary contribution,
+2. Study design, on the 20,558 included papers: primary contribution,
    spatial scope, time design, data origin, focal events, and tectonic
    setting.
 
@@ -353,7 +353,7 @@ none.
 Network terms come from the observation systems the abstract describes (a
 network, array, deployment, cable, mission, or data archive); seismic and
 non-seismic systems both count. Papers that say nothing about instruments
-carry no network terms (2,935 of the 5,272 papers carry at least one).
+carry no network terms (11,475 of the 20,558 papers carry at least one).
 Attributes of well-known named systems may be filled from knowledge (e.g.,
 Hi-net → borehole, permanent).
 
@@ -435,9 +435,26 @@ mechanism catalogs); **Seismic models** (existing models); **Geodetic**;
 
 ## 7. From labels to the graph
 
-- Terms are pooled per paper. A paper with two method uses carries the terms
-  of both, so an edge between two terms does not mean they belong to the
-  same method use or network.
+- An edge counts the papers that carry both terms. It also counts how many
+  of those papers use the two terms in the same analysis: one method use
+  together with the networks it draws on, or the attributes of one network.
+  Otherwise the two terms come from separate analyses that only share the
+  paper. Examples: DAS / fiber and Opportunistic, 60 of 60 papers in the same
+  analysis; Structure and Location, 25 of 381.
+- A method use is tied to a network when the abstract indicates that the
+  method used that network's data. This holds for 90% of the method uses in
+  papers that describe a network. When the abstract does not say, the method
+  and the network count as separate analyses.
+- Two different methods are always separate analyses, so edges between
+  method families count shared papers only.
+- Observed / expected compares a pair's count with the count expected if
+  the two terms were independent. In the same-paper views it counts papers,
+  N·n(a,b) / (n(a)·n(b)); in the same-analysis views it counts analyses,
+  M·m(a,b) / (m(a)·m(b)), where M is the number of analyses in view and m
+  counts the analyses that carry a term.
+- Primary contribution, spatial scope, time design, data origin, tectonic
+  setting, focal event, and source–structure link describe the whole study,
+  not one analysis, so their edges have no same-analysis count.
 - Data origin: Synthetic only is dropped when a real-data origin is also
   listed.
 - Focal events: names are merged across spelling variants and aliases (e.g.,

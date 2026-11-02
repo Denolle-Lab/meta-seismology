@@ -7,46 +7,58 @@ of how these studies combine targets (seismic source, Earth structure, or
 both), methods, magnitudes, distances, sensors, deployments, and study
 designs. Each node is a term (for example "DAS / fiber", "M 2–4", or
 "Surface-wave tomography"); two terms share an edge when the same paper
-carries both. The page also shows a term-by-term matrix and the papers that
-link source and structure.
+carries both. Each edge also shows how many of those papers use the two terms
+in the same analysis (one method together with the data and instruments it
+uses), and the graph can show only those links. The page also shows a
+term-by-term matrix, which can likewise count only pairs in the same
+analysis, and the papers that link source and structure.
 
 ## Corpus
 
-- Period: 2021–2025 (OpenAlex publication date).
+- Period: 2000–2025 (OpenAlex publication date). Journals that started
+  after 2000 are covered from their first year.
 - Journals (13): seven specialist journals (BSSA, SRL, The Seismic Record,
   JGR: Solid Earth, GRL, GJI, Seismica) and six from the Nature and Science
   families (Nature, Nature Geoscience, Nature Communications, Communications
   Earth & Environment, Science, Science Advances).
-- 9,438 candidate papers screened; 5,272 included as studies of seismic
+- 39,446 candidate papers screened; 20,558 included as studies of seismic
   sources, Earth structure, or both.
 
 The graph maps seismology tied to observations, not earthquake physics as a
 whole:
 
 - Included: rupture and earthquake-cycle simulations constrained by
-  observed data (114 papers), and papers that use only synthetic data,
-  almost all of them analysis-method papers (258).
-- Excluded: laboratory earthquake experiments and models of them (607
+  observed data (298 papers), and papers that use only synthetic data,
+  almost all of them analysis-method papers (983).
+- Excluded: laboratory earthquake experiments and models of them (2,040
   candidates), unless mineral-physics results are fitted quantitatively to
   seismic observations; generic theory and simulations not tied to observed
   events or seismic data, such as generic rupture dynamics, friction laws, or
-  wave theory (615). Other exclusions: non-seismic studies (1,186),
-  ground-motion and hazard studies (546), non-research items (501),
-  instruments and data infrastructure (383), effects of earthquakes only
-  (102), and other topics (226).
+  wave theory (2,772). Other exclusions: non-seismic studies (5,448),
+  ground-motion and hazard studies (2,225), non-research items (3,861),
+  instruments and data infrastructure (1,340), effects of earthquakes only
+  (546), and other topics (656).
 
 ## How the labels were made
 
 Bibliographic records came from OpenAlex, with missing abstracts filled from
 Semantic Scholar where available. A large language model (Anthropic Claude)
 read each title and abstract and assigned terms following the rules in
-[codebook.md](codebook.md). Every output was checked automatically for
-format and allowed values.
+[codebook.md](codebook.md). Most terms were assigned by Claude Opus. For
+10,066 of the 15,286 included papers from 2000–2020, the study-design terms
+(primary contribution, spatial scope, time design, data origin, tectonic
+setting, focal event) were assigned by the smaller Claude Sonnet, following
+the same rules. Every output was checked automatically for format and
+allowed values.
 
-To check consistency, 120 papers were labeled twice, independently, before
-the full run. The two runs made the same inclusion decision for 97% of the
-papers and chose the same primary contribution for 96%. On the other axes,
-their terms matched 87–100% on average, depending on the axis.
+To check consistency, 120 papers from 2021–2025 and 120 from 2000–2020 were
+labeled twice, independently, before the full runs. The two runs made the
+same inclusion decision for 97% and 99% of these papers; for 2021–2025 they
+also chose the same primary contribution for 96%. On the other axes, their
+terms matched 87–100% on average, depending on the axis. On 120 papers from
+2000–2020 labeled by both models, Opus and Sonnet chose the same primary
+contribution for 90% and the same spatial scope for 95%; their other
+study-design terms matched 90–94% on average.
 
 ## Limitations
 
@@ -54,21 +66,29 @@ their terms matched 87–100% on average, depending on the axis.
   title and abstract only, not the full text, and was not checked paper by
   paper. The one-line notes on how source and structure are linked are also
   model-written.
+- **Two labeling models.** Opus and Sonnet labeled random subsets of the
+  2000–2020 papers (5,220 and 10,066). Their shares of each study-design
+  term agree within 2 percentage points, except two data-origin terms:
+  Sonnet chose "Reanalysis of published results" more often (24% vs. 21%)
+  and "New data acquisition" less often (18% vs. 21%). Compare these two
+  terms across periods with care.
 - **Abstract style of Nature- and Science-family journals.** Their abstracts
   rarely name methods, instruments, networks, or magnitudes, so these papers
   carry fewer terms and their methods are under-counted. Their high share of
-  "Explanation & testing" as the primary contribution (35%, vs. 12% in
+  "Explanation & testing" as the primary contribution (30%, vs. 12% in
   specialist journals) partly reflects how these abstracts are written.
-- **Missing abstracts.** About 80% of Nature and Nature Geoscience abstracts
-  are missing from open metadata sources (OpenAlex, Crossref, Semantic
-  Scholar). Such papers were screened from the title; 54 included papers
-  were labeled from the title only (44 Nature Geoscience, 9 Nature, 1 SRL).
+- **Missing abstracts.** About 90% of the candidate Nature and Nature
+  Geoscience papers have no abstract in OpenAlex or Semantic Scholar. Such
+  papers were screened from the title; 392 included papers were labeled from
+  the title only (172 Nature Geoscience, 163 Nature, 57 in seven other
+  journals).
 - **Installation setting.** Onshore networks with no location cue in the
   text were labeled inconsistently, sometimes "Land surface" and sometimes
-  "not stated" (not shown): 1,144 papers carry Land surface and 1,292 carry
+  "not stated" (not shown): 5,060 papers carry Land surface and 4,919 carry
   "not stated". The Land surface node therefore undercounts land networks; the
   other installation settings are not affected.
-- **Citations** per year are from the OpenAlex snapshot of 2026-10-22.
+- **Citations** per year are from OpenAlex snapshots of 2026-10-22 (papers
+  from 2021–2025) and 2026-10-29 to 2026-10-30 (papers from 2000–2020).
 
 ## Future directions
 
@@ -79,7 +99,7 @@ journals. The graph can grow in several directions:
 - Broaden the scope from observational studies to seismology as a whole,
   adding laboratory earthquake experiments, rock and mineral physics
   experiments, earthquake modeling, and geodynamic and tectonic modeling.
-- Extend the corpus back in time, before 2021.
+- Extend the corpus further back in time, before 2000.
 - Add views that show how research has advanced over time: the development
   of methods, the spatial growth of seismic networks, the use of dense data
   such as DAS and nodal arrays, and the widening range of what is observed,
