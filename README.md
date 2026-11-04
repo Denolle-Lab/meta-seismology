@@ -44,7 +44,9 @@ whole:
 Bibliographic records came from OpenAlex, with missing abstracts filled from
 Semantic Scholar where available. A large language model (Anthropic Claude)
 read each title and abstract and assigned terms following the rules in
-[codebook.md](codebook.md). Most terms were assigned by Claude Opus. For
+two codebooks, one per labeling pass
+([extraction](labeling/extraction_codebook.md),
+[study design](labeling/design_codebook.md)). Most terms were assigned by Claude Opus. For
 10,066 of the 15,286 included papers from 2000–2020, the study-design terms
 (primary contribution, spatial scope, time design, data origin, tectonic
 setting, focal event) were assigned by the smaller Claude Sonnet, following
@@ -114,20 +116,23 @@ graph made with Claude Opus before it labels a large corpus, are in
 ## What the terms mean
 
 Click a term on the page for its one-line definition.
-[codebook.md](codebook.md) gives the full labeling rules for every axis,
-grouped as in the page legend, and the rules applied when the graph is built (for
-example, how magnitude classes are assigned).
+[codebook_summary.md](codebook_summary.md) summarizes the labeling rules for
+every axis, grouped as in the page legend, together with the rules applied when
+the graph is built (for example, how magnitude classes are assigned). The full
+rules, as the model read them, are in
+[labeling/extraction_codebook.md](labeling/extraction_codebook.md) and
+[labeling/design_codebook.md](labeling/design_codebook.md).
 
 ## Repository
 
 ```
-index.html        the page (served by GitHub Pages)
-codebook.md       labeling rules and build-time rules, by graph axis
-docs/             roadmap and pipeline
-config/           journals, prefilter, vocabulary, aliases, corrections
-labeling/         worker prompt templates and output schemas
-scripts/          collection, batching, validation, agreement, database, page
-environment.yml   Python environment for the scripts
+index.html           the page (served by GitHub Pages)
+codebook_summary.md  labeling rules and build-time rules, by graph axis
+docs/                roadmap and pipeline
+config/              journals, prefilter, vocabulary, aliases, corrections
+labeling/            codebooks, worker prompt templates, and output schemas
+scripts/             collection, batching, validation, agreement, database, page
+environment.yml      Python environment for the scripts
 ```
 
 The repository holds no data files; [docs/pipeline.md](docs/pipeline.md)

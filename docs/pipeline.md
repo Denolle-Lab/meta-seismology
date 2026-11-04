@@ -110,9 +110,12 @@ We ran eight workers in parallel. With Claude Opus, an extraction batch of
 Sonnet, a study-design batch of 60 papers took about 2 minutes and
 90,000–105,000 tokens.
 
-The workers read the full codebook: the rule text for every axis, with worked
-examples. [codebook.md](../codebook.md) summarizes it axis by axis, including
-every value and the rules applied at build time.
+The workers read the full codebook of their pass
+([labeling/extraction_codebook.md](../labeling/extraction_codebook.md),
+[labeling/design_codebook.md](../labeling/design_codebook.md)): the rule text
+for every axis, with worked examples.
+[codebook_summary.md](../codebook_summary.md) summarizes both axis by axis,
+with the rules applied at build time.
 
 ## 3. Pilot (two independent runs)
 
@@ -126,7 +129,7 @@ python scripts/make_pilot_batches.py --corpus data/interim/corpus_$T.parquet \
 for R in A B; do
   mkdir -p data/extraction/pilot/$R && cp -r data/extraction/pilot/input data/extraction/pilot/$R/
   python scripts/render_prompts.py --template labeling/extraction_prompt.md \
-      --run-dir data/extraction/pilot/$R --codebook <codebook> \
+      --run-dir data/extraction/pilot/$R --codebook labeling/extraction_codebook.md \
       --schema labeling/extraction.schema.json \
       --validator scripts/validate_extraction.py --python "$(which python)"
 done
@@ -147,7 +150,7 @@ sample until the remaining disagreements are boundary cases.
 RUN=data/extraction/2021-2025
 python scripts/make_batches.py --corpus data/interim/corpus_$T.parquet --out-dir $RUN/input
 # Pin the frozen codebook, template, and schema next to the outputs
-cp <codebook> $RUN/codebook_used.md
+cp labeling/extraction_codebook.md $RUN/codebook_used.md
 cp labeling/extraction_prompt.md $RUN/prompt_template_used.md
 cp labeling/extraction.schema.json $RUN/schema_used.json
 python scripts/render_prompts.py --template $RUN/prompt_template_used.md --run-dir $RUN \
@@ -179,7 +182,7 @@ python scripts/compare_design.py --a data/design/pilot/A/output --b data/design/
 python scripts/make_design_batches.py --db data/db/seismo_kg.sqlite \
     --out-dir data/design/2021-2025/input
 python scripts/render_prompts.py --template labeling/design_prompt.md \
-    --run-dir data/design/2021-2025 --codebook <design codebook> \
+    --run-dir data/design/2021-2025 --codebook labeling/design_codebook.md \
     --schema labeling/design.schema.json \
     --validator scripts/validate_design.py --python "$(which python)"
 ```
@@ -236,7 +239,7 @@ file.
 | Path | Role |
 |---|---|
 | `index.html` | The published page (GitHub Pages) |
-| `codebook.md` | Summary of the labeling rules and build-time rules, by graph axis |
+| `codebook_summary.md` | Summary of the labeling rules and build-time rules, by graph axis |
 | `docs/roadmap.md` | Stages, checks before each next stage, status, next steps |
 | `config/journals.csv` | Journals: OpenAlex source, ISSN, DOI patterns, journal group |
 | `config/openalex_extra_sources.csv` | OpenAlex sources that hold a journal's older volumes |
@@ -244,6 +247,7 @@ file.
 | `config/vocab.csv` | Every axis value with its page label and definition |
 | `config/focal_event_aliases.csv` | Focal-event alias → canonical name |
 | `config/extraction_corrections.csv` | Per-paper fixes applied at build time |
+| `labeling/*_codebook.md` | Full labeling rules read by the workers, one codebook per pass |
 | `labeling/*_prompt.md` | Worker prompt templates |
 | `labeling/*.schema.json` | JSON schemas of the worker outputs |
 | `scripts/fetch_openalex.py` | Download OpenAlex records per journal and date window |

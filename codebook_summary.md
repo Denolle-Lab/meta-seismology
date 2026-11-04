@@ -11,7 +11,10 @@ abstract, in two passes:
    setting.
 
 The rules below are those given to the model, shortened and grouped as in
-the page legend. Terms appear here under the labels used on the page.
+the page legend. Terms appear here under the labels used on the page. The
+full rules, as the model read them, are in
+[labeling/extraction_codebook.md](labeling/extraction_codebook.md) and
+[labeling/design_codebook.md](labeling/design_codebook.md).
 
 General rules:
 

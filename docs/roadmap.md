@@ -71,8 +71,10 @@ the title.
 
 ## 3. Draft the codebook
 
-Files: the codebook (rule text with worked examples; summarized axis by axis
-in [codebook.md](../codebook.md)), `config/vocab.csv`,
+Files: [labeling/extraction_codebook.md](../labeling/extraction_codebook.md)
+and [labeling/design_codebook.md](../labeling/design_codebook.md) (rule text
+with worked examples; summarized axis by axis in
+[codebook_summary.md](../codebook_summary.md)), `config/vocab.csv`,
 `labeling/*.schema.json`, `labeling/*_prompt.md`.
 
 A language model drafts the codebook from the research question and the
@@ -194,7 +196,7 @@ terms. Some fields need rules applied at build time:
 - [ ] Alias table reviewed by a person; ambiguous names checked against the
       paper titles.
 - [ ] Build-time rules approved by the expert and described in
-      [codebook.md](../codebook.md).
+      [codebook_summary.md](../codebook_summary.md).
 - [ ] Inconsistent conventions found in the outputs merged or reported as
       limitations.
 
