@@ -1,0 +1,14 @@
+journal_key,journal_name,publisher_group,issn_l,openalex_source_id,doi_prefix,high_impact,doi_extra_regex
+BSSA,Bulletin of the Seismological Society of America,SSA,0037-1106,S59098468,10.1785,false,
+SRL,Seismological Research Letters,SSA,0895-0695,S183957208,10.1785,false,
+TSR,The Seismic Record,SSA,2694-4006,S4210235748,10.1785,false,
+JGR-SE,Journal of Geophysical Research: Solid Earth,AGU,2169-9313,S4210228715,10.1029,false,^10\.1002/(\d{4}jb\d|jgrb\.\d)
+GRL,Geophysical Research Letters,AGU,0094-8276,S36624081,10.1029,false,^10\.1002/(\d{4}gl\d|grl\.\d)
+GJI,Geophysical Journal International,RAS-OUP,0956-540X,S108821158,10.1093,false,^10\.(1111|1046)/
+Seismica,Seismica,Seismica,2816-9387,S4387284412,10.26443,false,
+Nature,Nature,Nature,0028-0836,S137773608,10.1038,true,
+NatGeo,Nature Geoscience,Nature,1752-0894,S48977010,10.1038,true,
+NatComms,Nature Communications,Nature,2041-1723,S64187185,10.1038,true,
+CommsEE,Communications Earth & Environment,Nature,2662-4435,S4210221880,10.1038,true,
+Science,Science,Science,0036-8075,S3880285,10.1126,true,
+SciAdv,Science Advances,Science,2375-2548,S2737427234,10.1126,true,

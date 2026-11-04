@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Observational Seismology Study Graph</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+/* Layout: filter bar on top; workspace = view (graph / matrix / bridges) + detail panel; stacks on phones. */
+:root {
+  --bg: #f5f6f8; --panel: #ffffff; --ink: #18202a; --muted: #5b6776; --line: #dde2e8; --hover: #eef2f7;
+  --c-design: #eb6834; --c-method: #2a78d6; --c-source: #1baf7a; --c-network: #8b5fd1; --c-distance: #c99a1a;
+  --over: #2a78d6; --under: #eb6834; --mid: #b5b4ae;
+  --f-display: "IBM Plex Sans Condensed", "Arial Narrow", Arial, sans-serif;
+  --f-body: "IBM Plex Sans", Arial, Helvetica, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #13171c; --panel: #1a1f26; --ink: #e6eaef; --muted: #9ba7b5; --line: #2c333c; --hover: #232a33;
+  --c-design: #e2703a; --c-method: #3f8ae6; --c-source: #22a978; --c-network: #9a72dd; --c-distance: #b88c22;
+  --over: #3f8ae6; --under: #e2703a; --mid: #6b6a66; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #13171c; --panel: #1a1f26; --ink: #e6eaef; --muted: #9ba7b5; --line: #2c333c; --hover: #232a33;
+  --c-design: #e2703a; --c-method: #3f8ae6; --c-source: #22a978; --c-network: #9a72dd; --c-distance: #b88c22;
+  --over: #3f8ae6; --under: #e2703a; --mid: #6b6a66; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.45 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 32px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
+h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: 0.01em; }
+h2 { font-size: 1.1rem; font-weight: 600; }
+h3 { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+header.top { display: grid; gap: 10px; max-width: 1500px; margin: 0 auto 14px; }
+footer.foot { max-width: 1500px; margin: 14px auto 0; color: var(--muted); font-size: 0.85rem; }
+footer.foot a { color: var(--ink); }
+.lede { color: var(--muted); max-width: 70ch; margin: 0; }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); }
+.stats b { color: var(--ink); font-family: var(--f-mono); font-weight: 500; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: end; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.field { display: grid; gap: 3px; }
+.field label, .field .lab { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
+select, input[type="search"], input[type="number"] { font: inherit; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; }
+input[type="number"] { width: 5.5em; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { font: inherit; font-size: 0.85rem; border: 0; background: var(--bg); color: var(--ink); padding: 4px 9px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible, .chip:focus-visible { outline: 2px solid var(--c-method); outline-offset: 2px; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { font: inherit; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px;
+  border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.chip[aria-pressed="false"] { opacity: 0.45; }
+main.work { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 400px); gap: 14px; max-width: 1500px; margin: 0 auto; }
+@media (max-width: 900px) { main.work { grid-template-columns: minmax(0, 1fr); } }
+.view, .detail { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); padding: 6px 8px 0; flex-wrap: wrap; }
+.tabs button { font: 500 0.9rem var(--f-display); background: none; border: 0; border-bottom: 2px solid transparent;
+  color: var(--muted); padding: 6px 10px; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--c-method); }
+.pane { padding: 10px 12px 14px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: end; margin-bottom: 8px; }
+#graph { position: relative; width: 100%; min-height: 360px; }
+#graph svg { width: 100%; height: 100%; display: block; }
+.axislab { font: 600 11px var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; fill: var(--muted); }
+.axislab.lane { paint-order: stroke; stroke: var(--panel); stroke-width: 3px; pointer-events: none; }
+.nlabel { font: 500 10.5px var(--f-body); fill: var(--ink); paint-order: stroke; stroke: var(--panel); stroke-width: 3px; pointer-events: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.legend .bar { width: 26px; height: 0; border-top: 3px solid; border-radius: 0; }
+.matrix-wrap { overflow: auto; max-height: 72vh; border: 1px solid var(--line); border-radius: 6px; }
+table.matrix { border-collapse: separate; border-spacing: 0; font-size: 0.8rem; }
+table.matrix th, table.matrix td { padding: 4px 6px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); white-space: nowrap; }
+table.matrix thead th { position: sticky; top: 0; background: var(--panel); z-index: 2; font-weight: 600; vertical-align: bottom; }
+table.matrix thead th.col { writing-mode: vertical-rl; transform: rotate(180deg); text-align: left; max-height: 180px; }
+table.matrix tbody th { position: sticky; left: 0; background: var(--panel); z-index: 1; text-align: left; font-weight: 500; }
+table.matrix td { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; cursor: pointer; min-width: 38px; }
+table.matrix td.tot, table.matrix th.tot { color: var(--muted); cursor: default; }
+table.matrix td:hover { outline: 2px solid var(--ink); outline-offset: -2px; }
+/* Draggable row and column names; column headers are rotated 180°, so their left and right insets swap. */
+table.matrix th[data-r], table.matrix th[data-c] { cursor: grab; touch-action: none; user-select: none; }
+table.matrix th.dragging { opacity: 0.45; cursor: grabbing; }
+table.matrix th[data-r].drop-before { box-shadow: inset 0 3px 0 var(--ink); }
+table.matrix th[data-r].drop-after { box-shadow: inset 0 -3px 0 var(--ink); }
+table.matrix th[data-c].drop-before { box-shadow: inset -3px 0 0 var(--ink); }
+table.matrix th[data-c].drop-after { box-shadow: inset 3px 0 0 var(--ink); }
+.detail { padding: 12px 14px; display: grid; gap: 12px; align-content: start; max-height: calc(72vh + 120px); overflow: auto; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 0.86rem; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.pill { display: inline-block; font-size: 0.72rem; padding: 0 6px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.pill.hi { border-color: var(--c-design); color: var(--c-design); font-weight: 600; }
+.years { display: flex; align-items: end; gap: 3px; height: 46px; }
+.years div { flex: 1; display: grid; align-content: end; gap: 2px; text-align: center; font-size: 0.68rem; color: var(--muted); }
+.years div span.b { background: var(--c-method); border-radius: 2px 2px 0 0; min-height: 1px; }
+ul.papers { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+ul.papers li { display: grid; gap: 2px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+ul.papers a { color: var(--ink); text-decoration: none; font-weight: 500; }
+ul.papers a:hover { text-decoration: underline; }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 0.76rem; color: var(--muted); align-items: center; }
+.note { font-size: 0.8rem; color: var(--muted); margin: 0; }
+table.simple { border-collapse: collapse; font-size: 0.82rem; width: 100%; }
+table.simple th, table.simple td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+table.simple td.n { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+table.simple tr.click { cursor: pointer; } table.simple tr.click:hover { background: var(--hover); }
+.cols2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.cols2 > * { min-width: 0; }
+.more { font: inherit; font-size: 0.82rem; background: none; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); padding: 4px 10px; cursor: pointer; justify-self: start; }
+.warn { font-size: 0.8rem; color: var(--muted); border-left: 3px solid var(--c-design); padding-left: 8px; margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="top">
+  <div>
+    <h1>Observational Seismology Study Graph</h1>
+    <p class="lede" id="lede"></p>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div class="filters" role="group" aria-label="Filters">
+    <div class="field"><label for="y0">From</label><select id="y0"></select></div>
+    <div class="field"><label for="y1">To</label><select id="y1"></select></div>
+    <div class="field"><span class="lab">Journals</span>
+      <div class="seg" id="jg"><button data-v="all" aria-pressed="true">All</button><button data-v="hi" aria-pressed="false">Nature &amp; Science family</button><button data-v="soc" aria-pressed="false">Specialist journals</button></div></div>
+    <div class="field"><span class="lab">Target</span>
+      <div class="seg" id="tg"><button data-v="all" aria-pressed="true">All</button><button data-v="0" aria-pressed="false">Source</button><button data-v="1" aria-pressed="false">Structure</button><button data-v="2" aria-pressed="false">Both</button></div></div>
+    <div class="field"><label for="q">Title contains</label><input type="search" id="q" placeholder="e.g. DAS, Ridgecrest"></div>
+    <div class="field" style="flex-basis:100%"><span class="lab">Axes shown</span><div class="chips" id="axes"></div></div>
+  </div>
+</header>
+
+<main class="work">
+  <section class="view">
+    <div class="tabs" role="tablist">
+      <button role="tab" id="t-graph" aria-selected="true" aria-controls="p-graph">Graph</button>
+      <button role="tab" id="t-matrix" aria-selected="false" aria-controls="p-matrix">Matrix</button>
+      <button role="tab" id="t-bridges" aria-selected="false" aria-controls="p-bridges">Source ↔ structure</button>
+    </div>
+    <div class="pane" id="p-graph" role="tabpanel">
+      <div class="toolbar">
+        <div class="field"><label for="minEdge">Min papers per edge</label><input type="number" id="minEdge" min="1" value="5"></div>
+        <div class="field"><label for="minNode">Min papers per node</label><input type="number" id="minNode" min="1" value="3"></div>
+        <div class="field"><span class="lab">Edges join terms used</span>
+          <div class="seg" id="lk"><button data-v="paper" aria-pressed="true">In the same paper</button><button data-v="analysis" aria-pressed="false">In the same analysis</button></div></div>
+        <div class="field"><span class="lab">Edge color</span>
+          <div class="seg" id="ec"><button data-v="count" aria-pressed="true">Count</button><button data-v="lift" aria-pressed="false">Observed / expected</button><button data-v="share" aria-pressed="false">Same-analysis share</button></div></div>
+      </div>
+      <div id="graph"></div>
+      <div class="legend" id="legend"></div>
+      <p class="note">One lane per axis. Horizontal position: share of a node's papers that study sources (left) or structure (right); papers with both targets pull toward the middle. Node area: number of papers; an edge joins two nodes carried by the same papers (curved within a lane). Two terms are in the same analysis when they belong to one method use of a paper, together with the networks that method draws on; otherwise they only share the paper. Terms that describe the whole study (contribution, tectonic setting, focal event, spatial scope, time design, data origin, source–structure link) are not tied to one analysis: their edges are dashed in the share view and left out of the same-analysis view. In the same-analysis view, observed / expected counts analyses instead of papers. Hover a node to see its partners. Scroll to zoom in: nodes and labels grow up to about 1.5×, then keep that size while nodes spread apart and more labels appear; drag to pan.</p>
+    </div>
+    <div class="pane" id="p-matrix" role="tabpanel" hidden>
+      <div class="toolbar">
+        <div class="field"><label for="mr">Rows</label><select id="mr"></select></div>
+        <div class="field"><label for="mc">Columns</label><select id="mc"></select></div>
+        <div class="field"><span class="lab">Cell value</span>
+          <div class="seg" id="mv"><button data-v="count" aria-pressed="true">Papers</button><button data-v="lift" aria-pressed="false">Observed / expected</button></div></div>
+        <div class="field"><span class="lab">Pairs counted</span>
+          <div class="seg" id="mk"><button data-v="paper" aria-pressed="true">In the same paper</button><button data-v="analysis" aria-pressed="false">In the same analysis</button></div></div>
+        <div class="field" id="mreset-f" style="display:none"><span class="lab">Order</span><button class="more" id="mreset">Reset order</button></div>
+      </div>
+      <div class="matrix-wrap"><table class="matrix" id="matrix"></table></div>
+      <p class="note">Observed / expected = N·n(a,b) / (n(a)·n(b)) within the current filters, with N papers in view; above 1 means the pair co-occurs more often than chance. In the same analysis: a cell counts the papers that use both terms in one analysis (one method use with the networks it draws on, or one network), and observed / expected counts analyses instead of papers, M·m(a,b) / (m(a)·m(b)) with M analyses in view. Click a cell for its papers. Drag a row or column name to move it.</p>
+    </div>
+    <div class="pane" id="p-bridges" role="tabpanel" hidden></div>
+  </section>
+  <aside class="detail" id="detail" aria-live="polite"></aside>
+</main>
+<footer class="foot"><p>How the labels were made, and their limitations: <a href="https://github.com/Denolle-Lab/meta-seismology#readme">README</a> · What each term means: <a href="https://github.com/Denolle-Lab/meta-seismology/blob/main/codebook.md">Codebook</a></p></footer>
+
+<script>
+const KG = /*__KG_DATA__*/null;
+
+const AXIS_GROUP = {target: "design", link: "design", study_type: "design", contribution: "design",
+  spatial_scope: "design", time_design: "design", data_origin: "design", tectonic_setting: "design", method_family: "method", method_group: "method",
+  source_type: "source", magnitude: "source", focal_event: "source", sensor: "network", environment: "network", deployment: "network",
+  density: "network", distance: "distance", data_type: "distance"};
+const GROUP_VAR = {design: "--c-design", method: "--c-method", source: "--c-source", network: "--c-network", distance: "--c-distance"};
+const GROUP_LABEL = {design: "Target, study design, tectonic setting", method: "Methods", source: "Source type, magnitude, focal event",
+  network: "Network (sensor, installation, deployment, density)", distance: "Distance, data type"};
+const TARGET_LABEL = ["Source", "Structure", "Both"];
+const HIDE_VALUES = new Set(["not_stated", "not_applicable", "unspecified"]);
+// Axes that describe the whole study, not one analysis: their pairs cannot be split into same/separate analysis.
+const STUDY_AXES = new Set(["contribution", "spatial_scope", "time_design", "data_origin", "tectonic_setting", "focal_event", "link", "study_type"]);
+const studyPair = (i, j) => STUDY_AXES.has(C[i].a) || STUDY_AXES.has(C[j].a);
+// p.u lists a paper's analyses (a method use with the networks it draws on, or a network no method refers to).
+const sameAnalysis = (p, i, j) => p.u.some(u => u.includes(i) && u.includes(j));
+const pct = (a, b) => b ? Math.round(100 * a / b) + "%" : "–";
+
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const fmt = (x, d = 1) => x == null || isNaN(x) ? "–" : Number(x).toFixed(d);
+
+const C = KG.concepts, J = KG.journals;
+const P = KG.papers.map(p => ({doi: p[0], title: p[1], j: p[2], y: p[3], cpy: p[4], fwci: p[5], g: p[6], k: p[7], ln: p[8], u: p[9] || [], hi: J[p[2]].hi}));
+const years = [...new Set(P.map(p => p.y))].sort();
+const axesInfo = Object.fromEntries(KG.axes.map(a => [a.id, a]));
+
+const state = {y0: years[0], y1: years.at(-1), jg: "all", tg: "all", q: "",
+  axes: new Set(KG.axes.filter(a => a.on).map(a => a.id)),
+  minEdge: 5, minNode: 3, lk: "paper", ec: "count", mr: "method_family", mc: "sensor", mv: "count", mk: "paper", tab: "graph", sel: null};
+try { const s = JSON.parse(localStorage.getItem("kg-state") || "{}"); if (s.tab) state.tab = s.tab; } catch (e) {}
+
+function filtered() {
+  const q = state.q.trim().toLowerCase();
+  return P.filter(p => p.y >= state.y0 && p.y <= state.y1 &&
+    (state.jg === "all" || (state.jg === "hi") === p.hi) &&
+    (state.tg === "all" || p.g === +state.tg) && (!q || p.title.toLowerCase().includes(q)));
+}
+
+function visibleConcept(i) {
+  const c = C[i];
+  return state.axes.has(c.a) && !HIDE_VALUES.has(c.v);
+}
+
+function computeStats(papers) {
+  const K = C.length, n = new Int32Array(K), nHi = new Int32Array(K), nt = [new Int32Array(K), new Int32Array(K), new Int32Array(K)];
+  const pairs = new Map(), dpairs = new Map(), upairs = new Map(), m = new Int32Array(K);
+  let M = 0;
+  for (const p of papers) {
+    const ks = p.k.filter(visibleConcept);
+    for (const i of p.k) { n[i]++; nt[p.g][i]++; if (p.hi) nHi[i]++; }
+    for (let a = 0; a < ks.length; a++) for (let b = a + 1; b < ks.length; b++) {
+      const i = Math.min(ks[a], ks[b]), j = Math.max(ks[a], ks[b]), key = i * K + j;
+      pairs.set(key, (pairs.get(key) || 0) + 1);
+    }
+    // Pairs that meet in at least one analysis of this paper (dpairs, papers) and in each
+    // analysis (upairs, analyses); unit ids are sorted.
+    const seen = new Set();
+    for (const u of p.u) {
+      M++;
+      for (const i of u) m[i]++;
+      const us = u.filter(visibleConcept);
+      for (let a = 0; a < us.length; a++) for (let b = a + 1; b < us.length; b++) {
+        const key = us[a] * K + us[b];
+        upairs.set(key, (upairs.get(key) || 0) + 1);
+        if (!seen.has(key)) { seen.add(key); dpairs.set(key, (dpairs.get(key) || 0) + 1); }
+      }
+    }
+  }
+  return {N: papers.length, n, nHi, nt, pairs, dpairs, upairs, M, m, K};
+}
+
+function orientation(S, i) {
+  const src = S.nt[0][i], str = S.nt[1][i], tot = S.n[i];
+  return tot ? (str - src) / tot : 0;
+}
+
+function lift(S, i, j, nij) { return S.N && S.n[i] && S.n[j] ? S.N * nij / (S.n[i] * S.n[j]) : null; }
+// Same-analysis observed / expected, with analyses as units: M·m(i,j) / (m(i)·m(j)).
+function liftA(S, i, j, mij) { return S.M && S.m[i] && S.m[j] ? S.M * mij / (S.m[i] * S.m[j]) : null; }
+
+function papersWith(papers, ids) { return papers.filter(p => ids.every(i => p.k.includes(i))); }
+
+/* ---------- header ---------- */
+function renderHeader(papers) {
+  document.getElementById("lede").textContent = KG.meta.lede;
+  const hi = papers.filter(p => p.hi).length, both = papers.filter(p => p.g === 2).length;
+  document.getElementById("stats").innerHTML =
+    `<span><b>${papers.length.toLocaleString()}</b> papers in view</span>` +
+    `<span><b>${hi.toLocaleString()}</b> Nature &amp; Science family</span>` +
+    `<span><b>${both.toLocaleString()}</b> with source and structure targets</span>` +
+    `<span>Corpus: <b>${KG.meta.n_included.toLocaleString()}</b> included of <b>${KG.meta.n_screened.toLocaleString()}</b> screened candidates, ${esc(KG.meta.period)}</span>`;
+}
+
+/* ---------- graph ---------- */
+let zoomT = d3.zoomIdentity;
+function renderGraph(papers, S) {
+  const el = document.getElementById("graph");
+  const nodes = [];
+  for (let i = 0; i < C.length; i++) if (visibleConcept(i) && S.n[i] >= state.minNode) nodes.push({i, n: S.n[i], s: orientation(S, i)});
+  const ids = new Set(nodes.map(d => d.i));
+  // One horizontal lane per axis; x = source (left) to structure (right) orientation.
+  const lanes = KG.axes.map(a => a.id).filter(a => nodes.some(d => C[d.i].a === a));
+  // Narrow screens: lane names sit at the top-left of each lane instead of in a left column.
+  const W = el.clientWidth || 800, narrow = W < 640;
+  const LANE = narrow ? 84 : 76, TOP = narrow ? 34 : 30, LEFT = narrow ? 18 : 128, RIGHT = narrow ? 18 : 36;
+  const OFF = narrow ? 0.5 : 0.42, UP = narrow ? 0.32 : 0.42, DOWN = narrow ? 0.24 : 0.3;
+  const H = Math.max(360, TOP + LANE * lanes.length + 8);
+  el.style.height = H + "px";
+  let links = [];
+  // Edge weight v: papers with both terms, or (same-analysis view) papers that use both in one analysis.
+  const byAnalysis = state.lk === "analysis";
+  for (const [key, c] of S.pairs) {
+    if (c < state.minEdge) continue;
+    const i = Math.floor(key / S.K), j = key % S.K;
+    if (!ids.has(i) || !ids.has(j)) continue;
+    const study = studyPair(i, j), d = study ? null : S.dpairs.get(key) || 0, v = byAnalysis ? d : c;
+    if (v == null || v < state.minEdge) continue;
+    links.push({source: i, target: j, c, d, v, study,
+      lift: byAnalysis ? liftA(S, i, j, S.upairs.get(key) || 0) : lift(S, i, j, c)});
+  }
+  links.sort((a, b) => b.v - a.v); links = links.slice(0, 2500);
+  const byI = new Map(nodes.map(d => [d.i, d]));
+  links.forEach(l => { l.source = byI.get(l.source); l.target = byI.get(l.target); });
+  const maxN = d3.max(nodes, d => d.n) || 1;
+  const r = d3.scaleSqrt().domain([0, maxN]).range([3, 17]);
+  const xs = d3.scaleLinear().domain([-1, 1]).range([LEFT, W - RIGHT]);
+  const laneY = a => TOP + LANE * (lanes.indexOf(a) + OFF);
+  nodes.forEach(d => { d.r = r(d.n); d.tx = xs(d.s); d.ty = laneY(C[d.i].a); d.x = d.tx; d.y = d.ty + (Math.random() - 0.5) * 10; });
+  const sim = d3.forceSimulation(nodes)
+    .force("x", d3.forceX(d => d.tx).strength(0.9))
+    .force("y", d3.forceY(d => d.ty).strength(0.3))
+    .force("collide", d3.forceCollide(d => d.r + 1.5).iterations(3))
+    .stop();
+  for (let k = 0; k < 300; k++) sim.tick();
+  nodes.forEach(d => { d.y = Math.max(d.ty - LANE * UP + d.r, Math.min(d.ty + LANE * DOWN - d.r, d.y)); });
+  const maxC = d3.max(links, l => l.v) || 1;
+  const w = d3.scaleSqrt().domain([state.minEdge, maxC]).range([0.6, 6]);
+  const ramp = t => t < 0.5 ? d3.interpolateRgb(css("--under"), css("--mid"))(t * 2) : d3.interpolateRgb(css("--mid"), css("--over"))((t - 0.5) * 2);
+  const liftColor = d3.scaleDiverging().domain([-2, 0, 2]).clamp(true).interpolator(ramp);
+  const edgeColor = l => state.ec === "lift" ? liftColor(Math.log2(l.lift)) :
+    state.ec === "share" && !l.study ? ramp(l.d / l.c) : css("--mid");
+  const edgeTitle = l => `${C[l.source.i].l} — ${C[l.target.i].l}: ${l.c} papers` +
+    (l.study ? " (one term describes the whole study)" : `, ${l.d} in the same analysis (${pct(l.d, l.c)})`) +
+    `, obs/exp ${fmt(l.lift, 2)}${byAnalysis ? " (by analysis)" : ""}`;
+
+  el.innerHTML = "";
+  const svg = d3.select(el).append("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("preserveAspectRatio", "xMidYMin meet").attr("role", "img")
+    .attr("aria-label", "Co-occurrence graph of study attributes, one lane per axis");
+  // Semantic zoom: nodes and term labels grow with the zoom until labels are 4 pt larger (10.5 px, the
+  // .nlabel size, to ~15.8 px: about 1.5x), then keep that size while positions keep spreading apart,
+  // so crowded nodes separate and more labels fit. Edge widths stay constant. The plot is clipped below the header.
+  const LABEL_PX = 10.5, GROW = (LABEL_PX + 4 * 4 / 3) / LABEL_PX;
+  let gs = 1;
+  svg.append("clipPath").attr("id", "graph-clip").append("rect")
+    .attr("x", 0).attr("y", TOP - 8).attr("width", W).attr("height", H - TOP + 8);
+  const g = svg.append("g").attr("clip-path", "url(#graph-clip)");
+  nodes.forEach(d => { d.x0 = d.x; d.y0 = d.y; });
+  const laneRect = g.append("g").selectAll("rect").data(lanes).join("rect")
+    .attr("x", 0).attr("width", W).style("fill", (a, k) => k % 2 ? "transparent" : "var(--hover)");
+  const mid = g.append("line").attr("y1", TOP - 6).attr("y2", H)
+    .style("stroke", "var(--line)").attr("stroke-dasharray", "3 4");
+  svg.append("text").attr("class", "axislab").attr("x", LEFT).attr("y", 16).text(narrow ? "← Source" : "← Source studies");
+  const midLab = svg.append("text").attr("class", "axislab").attr("y", 16).attr("text-anchor", "middle").text(narrow ? "Even" : "Even split");
+  svg.append("text").attr("class", "axislab").attr("x", W - RIGHT).attr("y", 16).attr("text-anchor", "end").text(narrow ? "Structure →" : "Structure studies →");
+  const curve = l => {
+    const x1 = l.source.x, y1 = l.source.y, x2 = l.target.x, y2 = l.target.y;
+    const bend = Math.abs(y1 - y2) < zoomT.k ? -Math.min(LANE * zoomT.k * 0.9, Math.abs(x2 - x1) * 0.3) : 0;
+    return `M${x1},${y1} Q${(x1 + x2) / 2},${(y1 + y2) / 2 + bend} ${x2},${y2}`;
+  };
+  const le = g.append("g").attr("stroke-linecap", "round").attr("fill", "none").selectAll("path").data(links).join("path")
+    .attr("stroke", edgeColor).attr("stroke-width", l => w(l.v))
+    .attr("stroke-opacity", l => state.ec === "count" || (state.ec === "share" && l.study) ? 0.35 : 0.75)
+    .attr("stroke-dasharray", l => state.ec === "share" && l.study ? "3 3" : null)
+    .style("cursor", "pointer").on("click", (e, l) => select({type: "pair", ids: [l.source.i, l.target.i]}));
+  le.append("title").text(edgeTitle);
+  const ne = g.append("g").selectAll("circle").data(nodes).join("circle")
+    .attr("r", d => d.r)
+    .attr("fill", d => css(GROUP_VAR[AXIS_GROUP[C[d.i].a]])).attr("stroke", css("--panel")).attr("stroke-width", 1.5)
+    .attr("tabindex", 0).style("cursor", "pointer")
+    .on("click", (e, d) => select({type: "concept", ids: [d.i]}))
+    .on("keydown", (e, d) => { if (e.key === "Enter") select({type: "concept", ids: [d.i]}); });
+  ne.append("title").text(d => `${C[d.i].l} (${axesInfo[C[d.i].a].label}): ${d.n} papers`);
+  const lab = g.append("g").selectAll("text").data(nodes).join("text").attr("class", "nlabel")
+    .attr("text-anchor", "middle").text(d => C[d.i].l);
+  // Lane names are drawn last, with a halo, so nodes on narrow screens do not hide them.
+  const laneLab = g.append("g").selectAll("text").data(lanes).join("text").attr("class", "axislab lane")
+    .attr("x", 8).text(a => axesInfo[a].label);
+  const nb = new Map(nodes.map(d => [d.i, new Set([d.i])]));
+  links.forEach(l => { nb.get(l.source.i).add(l.target.i); nb.get(l.target.i).add(l.source.i); });
+
+  // Labels go to the largest terms first, each below, above, right or left of its node, wherever it
+  // overlaps no placed label and no node. Without a focus, each lane side gets about 3·k² candidates
+  // (k = zoom), and its 3 largest terms may cover a node if nothing else fits. With a focus, every
+  // partner of the focused term is a candidate and only partner nodes block labels.
+  // Half-widths are measured from the rendered text, again once the web fonts have loaded.
+  const measure = () => lab.attr("display", null)
+    .each(function (d) { d.hw = this.getComputedTextLength() / 2 / gs || C[d.i].l.length * 2.9; });
+  measure();
+  const half = d => d.hw * gs;
+  let focused = null;
+  function placeLabels() {
+    const s = focused == null ? null : nb.get(focused) || null;
+    const inView = d => d.x >= 0 && d.x <= W && d.y >= TOP - 8 && d.y <= H;
+    let cands = [], must = new Set();
+    if (s) {
+      cands = nodes.filter(d => s.has(d.i));
+      must = new Set(s);
+    } else {
+      const cap = Math.round(3 * zoomT.k * zoomT.k);
+      for (const a of lanes) for (const left of [true, false]) {
+        const side = nodes.filter(d => C[d.i].a === a && (d.s < 0) === left).sort((x, y) => y.n - x.n);
+        cands.push(...side.slice(0, cap));
+        side.slice(0, 3).forEach(d => must.add(d.i));
+      }
+    }
+    const blockers = s ? cands : nodes;
+    cands = cands.filter(inView).sort((x, y) => (y.i === focused) - (x.i === focused) || y.n - x.n);
+    const boxes = [], pos = new Map();
+    // Lane names count as placed labels, so term labels never cover them.
+    laneLab.each(function () { const y = +this.getAttribute("y"); boxes.push([8, 8 + this.getComputedTextLength(), y - 10, y + 3]); });
+    const hitsLabel = b => boxes.some(o => b[1] + 4 > o[0] && b[0] - 4 < o[1] && b[3] + 2 > o[2] && b[2] - 2 < o[3]);
+    const hitsNode = (b, self) => blockers.some(n => n !== self &&
+      n.x + n.rs > b[0] && n.x - n.rs < b[1] && n.y + n.rs > b[2] && n.y - n.rs < b[3]);
+    for (const d of cands) {
+      const h = half(d);
+      const box = (x, y) => { x = Math.max(h + 4, Math.min(W - h - 4, x)); return [x - h, x + h, y - 10 * gs, y + 4 * gs, x, y]; };
+      const opts = [box(d.x, d.y + d.rs + 11 * gs), box(d.x, d.y - d.rs - 4 * gs),
+        box(d.x + d.rs + 4 + h, d.y + 4 * gs), box(d.x - d.rs - 4 - h, d.y + 4 * gs)];
+      const b = opts.find(o => !hitsLabel(o) && !hitsNode(o, d)) || (must.has(d.i) ? opts.find(o => !hitsLabel(o)) : null);
+      if (b) { boxes.push(b); pos.set(d.i, b); }
+    }
+    lab.attr("display", d => pos.has(d.i) ? null : "none")
+      .attr("x", d => pos.has(d.i) ? pos.get(d.i)[4] : 0).attr("y", d => pos.has(d.i) ? pos.get(d.i)[5] : 0);
+  }
+  const focus = i => {
+    focused = i;
+    const s = i == null ? null : nb.get(i) || null;
+    ne.attr("opacity", d => !s || s.has(d.i) ? 1 : 0.15);
+    le.attr("opacity", l => !s || l.source.i === i || l.target.i === i ? 1 : 0.06);
+    placeLabels();
+  };
+  function draw() {
+    const t = zoomT;
+    gs = Math.min(t.k, GROW);
+    nodes.forEach(d => { d.x = t.applyX(d.x0); d.y = t.applyY(d.y0); d.rs = d.r * gs; });
+    laneRect.attr("y", (a, k) => t.applyY(TOP + LANE * k)).attr("height", LANE * t.k);
+    const mx = t.applyX(xs(0));
+    mid.attr("x1", mx).attr("x2", mx);
+    midLab.attr("x", mx).attr("display", mx - LEFT > 110 && W - RIGHT - mx > 130 ? null : "none");
+    le.attr("d", curve);
+    ne.attr("cx", d => d.x).attr("cy", d => d.y).attr("r", d => d.rs);
+    lab.style("font-size", `${LABEL_PX * gs}px`);
+    // Lane names stay inside the visible part of their lane while zoomed.
+    laneLab.attr("y", (a, k) => {
+      const y0 = t.applyY(TOP + LANE * k), y1 = y0 + LANE * t.k, lo = Math.max(y0, TOP - 8) + 13;
+      return Math.min(y1 - 4, Math.max(lo, narrow ? y0 + 13 : t.applyY(laneY(a)) + 4));
+    });
+    placeLabels();
+  }
+  ne.on("mouseenter", (e, d) => focus(d.i)).on("mouseleave", () => focus(state.sel && state.sel.type === "concept" ? state.sel.ids[0] : null));
+  if (state.sel && state.sel.type === "concept" && ids.has(state.sel.ids[0])) focused = state.sel.ids[0];
+  // The initial view shows the whole graph and is the furthest zoom-out; panning stays inside it.
+  const zoom = d3.zoom().scaleExtent([1, 8]).extent([[0, 0], [W, H]]).translateExtent([[0, 0], [W, H]])
+    .on("zoom", e => { zoomT = e.transform; draw(); });
+  svg.call(zoom).call(zoom.transform, zoomT).call(zoom.translateBy, 0, 0);
+  focus(focused);
+  if (document.fonts && document.fonts.status !== "loaded") document.fonts.ready.then(() => { measure(); placeLabels(); });
+  renderLegend();
+}
+
+function renderLegend() {
+  const shown = new Set([...state.axes].map(a => AXIS_GROUP[a]));
+  let h = Object.entries(GROUP_LABEL).filter(([k]) => shown.has(k))
+    .map(([k, v]) => `<span><i style="background:var(${GROUP_VAR[k]})"></i>${esc(v)}</span>`).join("");
+  if (state.ec === "lift") h += `<span><i class="bar" style="border-color:var(--over)"></i>More than expected</span>` +
+    `<span><i class="bar" style="border-color:var(--mid)"></i>As expected</span><span><i class="bar" style="border-color:var(--under)"></i>Less than expected</span>`;
+  if (state.ec === "share") h += `<span><i class="bar" style="border-color:var(--over)"></i>Mostly in the same analysis</span>` +
+    `<span><i class="bar" style="border-color:var(--mid)"></i>Half</span><span><i class="bar" style="border-color:var(--under)"></i>Mostly in separate analyses</span>` +
+    `<span><i class="bar" style="border-color:var(--mid);border-top-style:dashed"></i>Whole-study term</span>`;
+  document.getElementById("legend").innerHTML = h;
+}
+
+/* ---------- matrix ---------- */
+// Row and column order set by dragging, per role and axis ("r:sensor" -> concept ids). Terms not
+// in it follow in the default order (most papers first). Reset order clears it.
+const matOrder = {};
+function inOrder(key, ids) {
+  const o = matOrder[key];
+  if (!o) return ids;
+  const has = new Set(ids), known = new Set(o);
+  return [...o.filter(i => has.has(i)), ...ids.filter(i => !known.has(i))];
+}
+
+// Drag a row or column name; on release it moves before or after the name under the pointer.
+// Listeners sit on window and headers are looked up on every move, so the drag survives a
+// re-render of the table (e.g., after a window resize).
+function dragHeader(e, th) {
+  if (e.button !== 0) return;
+  const attr = th.dataset.r != null ? "r" : "c", isRow = attr === "r", id = +th.dataset[attr];
+  const heads = () => [...document.querySelectorAll(`#matrix th[data-${attr}]`)];
+  const span = h => { const r = h.getBoundingClientRect(); return isRow ? [r.top, r.bottom] : [r.left, r.right]; };
+  const clear = hs => hs.forEach(h => h.classList.remove("dragging", "drop-before", "drop-after"));
+  const x0 = e.clientX, y0 = e.clientY;
+  let moved = false, target = null, after = false;
+  const move = ev => {
+    if (!moved && Math.hypot(ev.clientX - x0, ev.clientY - y0) < 4) return;
+    moved = true;
+    const hs = heads(), p = isRow ? ev.clientY : ev.clientX;
+    if (!hs.length) return;
+    clear(hs);
+    hs.find(h => +h.dataset[attr] === id)?.classList.add("dragging");
+    const h = hs.find(h => { const [a, b] = span(h); return p >= a && p < b; }) || (p < span(hs[0])[0] ? hs[0] : hs.at(-1));
+    const [a, b] = span(h);
+    target = +h.dataset[attr]; after = p > (a + b) / 2;
+    h.classList.add(after ? "drop-after" : "drop-before");
+  };
+  const up = () => {
+    window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); window.removeEventListener("pointercancel", up);
+    const hs = heads();
+    clear(hs);
+    const ids = hs.map(h => +h.dataset[attr]).filter(i => i !== id);
+    if (!moved || target == null || target === id || !ids.includes(target) || ids.length === hs.length) return;
+    ids.splice(ids.indexOf(target) + (after ? 1 : 0), 0, id);
+    const key = isRow ? `r:${state.mr}` : `c:${state.mc}`;
+    matOrder[key] = [...ids, ...(matOrder[key] || []).filter(i => !ids.includes(i))];
+    render();
+  };
+  try { th.setPointerCapture(e.pointerId); } catch (err) {}
+  window.addEventListener("pointermove", move); window.addEventListener("pointerup", up); window.addEventListener("pointercancel", up);
+}
+
+function renderMatrix(papers, S) {
+  const rows = inOrder(`r:${state.mr}`, C.map((c, i) => i).filter(i => C[i].a === state.mr && !HIDE_VALUES.has(C[i].v) && S.n[i] > 0).sort((a, b) => S.n[b] - S.n[a]));
+  const cols = inOrder(`c:${state.mc}`, C.map((c, i) => i).filter(i => C[i].a === state.mc && !HIDE_VALUES.has(C[i].v) && S.n[i] > 0).sort((a, b) => S.n[b] - S.n[a]));
+  // cnt: papers with both terms; dcnt: papers with both in one analysis; ucnt: analyses with both.
+  const cnt = new Map(), dcnt = new Map(), ucnt = new Map();
+  const rs = new Set(rows), cs = new Set(cols);
+  const studyM = STUDY_AXES.has(state.mr) || STUDY_AXES.has(state.mc);
+  for (const p of papers) {
+    const pr = p.k.filter(i => rs.has(i)), pc = p.k.filter(i => cs.has(i));
+    for (const i of pr) for (const j of pc) if (i !== j) cnt.set(i * S.K + j, (cnt.get(i * S.K + j) || 0) + 1);
+    const seen = new Set();
+    for (const u of p.u) for (const i of u) if (rs.has(i)) for (const j of u) if (cs.has(j) && i !== j) {
+      const key = i * S.K + j;
+      ucnt.set(key, (ucnt.get(key) || 0) + 1);
+      if (!seen.has(key)) { seen.add(key); dcnt.set(key, (dcnt.get(key) || 0) + 1); }
+    }
+  }
+  const byA = state.mk === "analysis";
+  const maxC = d3.max([...(byA ? dcnt : cnt).values()]) || 1;
+  const seq = v => `color-mix(in oklab, var(--c-method) ${Math.round(8 + 72 * Math.sqrt(v / maxC))}%, var(--panel))`;
+  const div = v => { const t = Math.max(-2, Math.min(2, Math.log2(v))) / 2;
+    return t >= 0 ? `color-mix(in oklab, var(--over) ${Math.round(70 * t)}%, var(--panel))` : `color-mix(in oklab, var(--under) ${Math.round(-70 * t)}%, var(--panel))`; };
+  let h = (byA && studyM ? `<caption class="note">Same analysis does not apply here: ${esc(axesInfo[STUDY_AXES.has(state.mr) ? state.mr : state.mc].label)} describes the whole study.</caption>` :
+    byA && !dcnt.size ? `<caption class="note">No two of these terms occur in one analysis.</caption>` : "") +
+    `<thead><tr><th>${esc(axesInfo[state.mr].label)} \\ ${esc(axesInfo[state.mc].label)}</th>` +
+    cols.map(j => `<th class="col" data-c="${j}" title="${esc(C[j].d)}">${esc(C[j].l)}</th>`).join("") + `<th class="col tot">All papers</th></tr></thead><tbody>`;
+  for (const i of rows) {
+    h += `<tr><th data-r="${i}" title="${esc(C[i].d)}">${esc(C[i].l)}</th>`;
+    for (const j of cols) {
+      const key = i * S.K + j, v = cnt.get(key) || 0, d = studyM ? null : dcnt.get(key) || 0, u = ucnt.get(key) || 0;
+      const nv = byA ? d || 0 : v, lf = !nv ? 0 : byA ? liftA(S, i, j, u) : lift(S, i, j, v);
+      const bg = !nv ? "transparent" : state.mv === "lift" ? div(lf) : seq(nv);
+      const txt = !nv ? "" : state.mv === "lift" ? fmt(lf, 1) : nv;
+      h += `<td data-i="${i}" data-j="${j}" style="background:${bg}" title="${esc(C[i].l)} × ${esc(C[j].l)}: ${v} papers` +
+        `${d == null ? "" : `, ${d} in the same analysis (${u} analyses)`}, obs/exp ${fmt(lf, 2)}${byA ? " by analysis" : ""}">${txt}</td>`;
+    }
+    h += `<td class="tot">${S.n[i]}</td></tr>`;
+  }
+  h += `</tbody>`;
+  const t = document.getElementById("matrix");
+  t.innerHTML = h;
+  t.querySelectorAll("td[data-i]").forEach(td => td.addEventListener("click", () => select({type: "pair", ids: [+td.dataset.i, +td.dataset.j]})));
+  t.querySelectorAll("th[data-r], th[data-c]").forEach(th => th.addEventListener("pointerdown", e => dragHeader(e, th)));
+  document.getElementById("mreset-f").style.display = matOrder[`r:${state.mr}`] || matOrder[`c:${state.mc}`] ? "" : "none";
+}
+
+/* ---------- bridges ---------- */
+function renderBridges(papers, S) {
+  const both = papers.filter(p => p.g === 2);
+  const linkIds = C.map((c, i) => i).filter(i => C[i].a === "link");
+  const ys = [...new Set(papers.map(p => p.y))].sort();
+  let t = `<table class="simple"><thead><tr><th>How source and structure are linked</th>${ys.map(y => `<th>${y}</th>`).join("")}<th>All</th></tr></thead><tbody>`;
+  for (const i of linkIds) {
+    const ps = both.filter(p => p.k.includes(i));
+    t += `<tr class="click" data-i="${i}"><td title="${esc(C[i].d)}">${esc(C[i].l)}</td>${ys.map(y => `<td class="n">${ps.filter(p => p.y === y).length}</td>`).join("")}<td class="n">${ps.length}</td></tr>`;
+  }
+  const share = ys.map(y => { const a = papers.filter(p => p.y === y); return a.length ? 100 * a.filter(p => p.g === 2).length / a.length : 0; });
+  t += `<tr><td>Share of papers with both targets</td>${share.map(s => `<td class="n">${fmt(s, 1)}%</td>`).join("")}<td class="n">${fmt(papers.length ? 100 * both.length / papers.length : 0, 1)}%</td></tr></tbody></table>`;
+  const bridge = C.map((c, i) => i).filter(i => !["target", "link", "study_type"].includes(C[i].a) && !HIDE_VALUES.has(C[i].v) && S.n[i] >= 10)
+    .map(i => ({i, s: orientation(S, i), n: S.n[i], b: S.nt[2][i]})).filter(d => Math.abs(d.s) <= 0.35).sort((a, b) => b.n - a.n).slice(0, 20);
+  let bt = `<table class="simple"><thead><tr><th>Term</th><th>Axis</th><th>Papers</th><th>Both</th></tr></thead><tbody>` +
+    bridge.map(d => `<tr class="click" data-i="${d.i}"><td>${esc(C[d.i].l)}</td><td>${esc(axesInfo[C[d.i].a].label)}</td><td class="n">${d.n}</td><td class="n">${d.b}</td></tr>`).join("") + `</tbody></table>`;
+  const el = document.getElementById("p-bridges");
+  el.innerHTML = `<div class="cols2"><div><h2>Papers that study both</h2><p class="note">${both.length} of ${papers.length} papers in view report both source and structure results. Click a row for its papers.</p>${t}</div>` +
+    `<div><h2>Terms used on both sides</h2><p class="note">Terms whose papers split roughly evenly between source and structure studies (orientation within ±0.35, at least 10 papers).</p>${bt}</div></div>` +
+    `<h2 style="margin-top:14px">Most cited papers with both targets</h2><p class="note">Citations per year since publication (OpenAlex ${esc(KG.meta.snapshot)}).</p>${paperList(both, 25)}`;
+  el.querySelectorAll("tr.click").forEach(tr => tr.addEventListener("click", () => select({type: "concept", ids: [+tr.dataset.i], restrict: "both"})));
+  bindMore(el);
+}
+
+/* ---------- detail ---------- */
+// tag (optional): p -> short label shown with each paper.
+function paperList(ps, limit, tag) {
+  const sorted = ps.slice().sort((a, b) => (b.cpy ?? -1) - (a.cpy ?? -1));
+  const li = p => `<li><a href="https://doi.org/${esc(p.doi)}" target="_blank" rel="noopener">${esc(p.title)}</a>` +
+    `<span class="meta"><span class="pill${p.hi ? " hi" : ""}">${esc(J[p.j].k)}</span><span>${p.y}</span>` +
+    `<span class="num">${fmt(p.cpy)} cites/yr</span><span>${TARGET_LABEL[p.g]}</span>` +
+    (tag ? `<span class="pill">${tag(p)}</span>` : "") + `</span>` +
+    (p.ln ? `<span class="note">${esc(p.ln)}</span>` : "") + `</li>`;
+  const first = sorted.slice(0, limit).map(li).join("");
+  const rest = sorted.slice(limit);
+  return `<ul class="papers">${first}</ul>` + (rest.length ? `<button class="more" data-more="${encodeURIComponent(JSON.stringify(rest.map(p => p.doi)))}">Show ${rest.length} more</button>` : "");
+}
+
+function bindMore(root, tag) {
+  root.querySelectorAll("button.more").forEach(b => b.addEventListener("click", () => {
+    const dois = new Set(JSON.parse(decodeURIComponent(b.dataset.more)));
+    const ps = P.filter(p => dois.has(p.doi));
+    b.insertAdjacentHTML("beforebegin", paperList(ps, ps.length, tag).replace(/<button[\s\S]*$/, ""));
+    b.remove();
+  }));
+}
+
+function yearBars(ps) {
+  const ys = years.filter(y => y >= state.y0 && y <= state.y1);
+  const counts = ys.map(y => ps.filter(p => p.y === y).length), m = Math.max(1, ...counts);
+  return `<div class="years" aria-label="Papers per year">${ys.map((y, k) => `<div title="${y}: ${counts[k]}"><span class="b" style="height:${Math.round(30 * counts[k] / m)}px"></span>${String(y).slice(2)}</div>`).join("")}</div>`;
+}
+
+function renderDetail(papers, S) {
+  const el = document.getElementById("detail");
+  const sel = state.sel;
+  if (!sel) {
+    const hi = papers.filter(p => p.hi);
+    el.innerHTML = `<h2>How to read this</h2><p class="note">Each node is a term on one axis (target, study design, tectonic setting, method family, source type, magnitude class, distance, sensor, installation setting, deployment, density). An edge joins two nodes when the same paper carries both; it also counts the papers that use both in the same analysis (one method use, with the networks it draws on). Click a node, an edge, or a matrix cell to list its papers, sorted by citations per year.</p>` +
+      `<p class="warn">Nature &amp; Science family abstracts rarely name methods or instruments, so their papers carry fewer terms. Use the Journals filter to look at them on their own (${hi.length} papers in view).</p>` +
+      `<h3>Most cited papers in view</h3>${paperList(papers, 12)}`;
+    bindMore(el);
+    return;
+  }
+  let ps = papersWith(papers, sel.ids);
+  // For a pair, each paper is labeled by whether it uses both terms in one analysis; in the
+  // same-analysis view of the open tab, only those papers are listed.
+  const pair = sel.ids.length === 2 && !studyPair(...sel.ids);
+  const onlyA = pair && (state.tab === "graph" ? state.lk : state.tab === "matrix" ? state.mk : "paper") === "analysis";
+  const tag = pair && !onlyA ? p => sameAnalysis(p, ...sel.ids) ? "Same analysis" : "Separate analyses" : null;
+  if (sel.restrict === "both") ps = ps.filter(p => p.g === 2);
+  const all = ps;
+  if (onlyA) ps = ps.filter(p => sameAnalysis(p, ...sel.ids));
+  const name = sel.ids.map(i => esc(C[i].l)).join(" + ");
+  let h = `<div><h3>${sel.ids.map(i => esc(axesInfo[C[i].a].label)).join(" + ")}</h3><h2>${name}</h2></div>`;
+  if (sel.ids.length === 1) h += `<p class="note">${esc(C[sel.ids[0]].d)}</p>`;
+  const hi = ps.filter(p => p.hi).length, cp = ps.map(p => p.cpy).filter(x => x != null).sort((a, b) => a - b);
+  const med = cp.length ? cp[Math.floor(cp.length / 2)] : null;
+  const g = [0, 1, 2].map(k => ps.filter(p => p.g === k).length);
+  h += `<dl class="kv"><dt>Papers</dt><dd>${ps.length}</dd><dt>Nature &amp; Science family</dt><dd>${hi}</dd>` +
+    `<dt>Source / structure / both</dt><dd>${g.join(" / ")}</dd><dt>Median cites/yr</dt><dd>${fmt(med)}</dd>`;
+  if (sel.ids.length === 2) {
+    const lf = lift(S, sel.ids[0], sel.ids[1], all.length);
+    const first = ps.length ? Math.min(...ps.map(p => p.y)) : null;
+    const [a, b] = sel.ids, dn = studyPair(a, b) ? null : all.filter(p => sameAnalysis(p, a, b)).length;
+    const un = dn == null ? 0 : all.reduce((s, p) => s + p.u.filter(u => u.includes(a) && u.includes(b)).length, 0);
+    h += `<dt>Same analysis</dt><dd>${dn == null ? "– (whole-study term)" : `${dn} of ${all.length} (${pct(dn, all.length)})`}</dd>` +
+      `<dt>Observed / expected</dt><dd>${fmt(lf, 2)}</dd>` +
+      (dn == null ? "" : `<dt>Obs / exp by analysis</dt><dd>${fmt(liftA(S, a, b, un), 2)}</dd>`) +
+      `<dt>First year in view</dt><dd>${first ?? "–"}</dd>`;
+  }
+  h += `</dl>${yearBars(ps)}`;
+  if (sel.ids.length === 1) {
+    const i = sel.ids[0], co = [];
+    for (let j = 0; j < C.length; j++) {
+      if (j === i || HIDE_VALUES.has(C[j].v) || !state.axes.has(C[j].a)) continue;
+      const key = Math.min(i, j) * S.K + Math.max(i, j), c = S.pairs.get(key) || 0;
+      if (c >= 3) co.push({j, c, lf: lift(S, i, j, c), d: studyPair(i, j) ? null : S.dpairs.get(key) || 0});
+    }
+    const byC = co.slice().sort((a, b) => b.c - a.c).slice(0, 8), byL = co.filter(d => d.c >= 5).sort((a, b) => b.lf - a.lf).slice(0, 8);
+    const tbl = (rows, title) => `<div><h3>${title}</h3><table class="simple"><thead><tr><th></th><th class="n">Papers</th><th class="n">Obs/exp</th>` +
+      `<th class="n" title="Share of these papers that use both terms in the same analysis">Same analysis</th></tr></thead><tbody>` +
+      `${rows.map(d => `<tr class="click" data-pair="${i},${d.j}"><td>${esc(C[d.j].l)}</td><td class="n">${d.c}</td><td class="n">${fmt(d.lf, 2)}×</td>` +
+        `<td class="n">${d.d == null ? "–" : pct(d.d, d.c)}</td></tr>`).join("") || `<tr><td class="note">None in view</td></tr>`}</tbody></table></div>`;
+    h += `<div class="cols2">${tbl(byC, "Most frequent partners")}${tbl(byL, "Most over-represented (≥5 papers)")}</div>`;
+  }
+  h += onlyA ? `<h3>Papers using both in the same analysis</h3>${ps.length ? paperList(ps, 30) : `<p class="note">None of these papers use both terms in the same analysis.</p>`}`
+    : `<h3>Papers</h3>${ps.length ? paperList(ps, 30, tag) : `<p class="note">No papers in view.</p>`}`;
+  el.innerHTML = h;
+  el.querySelectorAll("tr[data-pair]").forEach(tr => tr.addEventListener("click", () => select({type: "pair", ids: tr.dataset.pair.split(",").map(Number)})));
+  bindMore(el, tag);
+}
+
+function select(sel) { state.sel = sel; const papers = filtered(); renderDetail(papers, computeStats(papers));
+  if (state.tab === "graph") renderGraph(papers, computeStats(papers)); }
+
+/* ---------- controls ---------- */
+function setupControls() {
+  for (const id of ["y0", "y1"]) {
+    const s = document.getElementById(id);
+    s.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
+    s.value = state[id];
+    s.addEventListener("change", () => { state[id] = +s.value; if (state.y0 > state.y1) [state.y0, state.y1] = [state.y1, state.y0]; render(); });
+  }
+  const seg = (id, key) => document.querySelectorAll(`#${id} button`).forEach(b => b.addEventListener("click", () => {
+    state[key] = b.dataset.v; document.querySelectorAll(`#${id} button`).forEach(x => x.setAttribute("aria-pressed", x === b)); render();
+  }));
+  seg("jg", "jg"); seg("tg", "tg"); seg("lk", "lk"); seg("ec", "ec"); seg("mv", "mv"); seg("mk", "mk");
+  document.getElementById("mreset").addEventListener("click", () => { delete matOrder[`r:${state.mr}`]; delete matOrder[`c:${state.mc}`]; render(); });
+  const q = document.getElementById("q");
+  let timer; q.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(() => { state.q = q.value; render(); }, 250); });
+  for (const id of ["minEdge", "minNode"]) {
+    const inp = document.getElementById(id); inp.value = state[id];
+    inp.addEventListener("change", () => { state[id] = Math.max(1, +inp.value || 1); render(); });
+  }
+  const chips = document.getElementById("axes");
+  chips.innerHTML = KG.axes.map(a => `<button class="chip" data-a="${a.id}" aria-pressed="${state.axes.has(a.id)}" style="color:var(${GROUP_VAR[AXIS_GROUP[a.id]]})"><span class="dot"></span><span style="color:var(--ink)">${esc(a.label)}</span></button>`).join("");
+  chips.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
+    const a = b.dataset.a; state.axes.has(a) ? state.axes.delete(a) : state.axes.add(a);
+    b.setAttribute("aria-pressed", state.axes.has(a)); render();
+  }));
+  for (const [id, key] of [["mr", "mr"], ["mc", "mc"]]) {
+    const s = document.getElementById(id);
+    s.innerHTML = KG.axes.map(a => `<option value="${a.id}">${esc(a.label)}</option>`).join("");
+    s.value = state[key]; s.addEventListener("change", () => { state[key] = s.value; render(); });
+  }
+  document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => {
+    state.tab = b.id.slice(2);
+    try { localStorage.setItem("kg-state", JSON.stringify({tab: state.tab})); } catch (e) {}
+    render();
+  }));
+  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(render, 200); });
+  // Graph colors are read from the theme tokens at draw time: redraw when the theme changes.
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+  new MutationObserver(render).observe(document.documentElement, {attributes: true, attributeFilter: ["data-theme"]});
+}
+
+function render() {
+  const papers = filtered(), S = computeStats(papers);
+  renderHeader(papers);
+  for (const t of ["graph", "matrix", "bridges"]) {
+    document.getElementById("t-" + t).setAttribute("aria-selected", state.tab === t);
+    document.getElementById("p-" + t).hidden = state.tab !== t;
+  }
+  if (state.tab === "graph") renderGraph(papers, S);
+  if (state.tab === "matrix") renderMatrix(papers, S);
+  if (state.tab === "bridges") renderBridges(papers, S);
+  renderDetail(papers, S);
+}
+
+setupControls();
+render();
+</script>

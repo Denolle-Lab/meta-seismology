@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "doi",
+    "contribution",
+    "spatial_scope",
+    "time_design",
+    "data_origin",
+    "focal_events",
+    "tectonic_settings",
+    "study_area",
+    "evidence"
+  ],
+  "properties": {
+    "doi": {
+      "type": "string"
+    },
+    "contribution": {
+      "enum": [
+        "observation",
+        "explanation",
+        "synthesis",
+        "method",
+        "resource_operations"
+      ]
+    },
+    "spatial_scope": {
+      "enum": [
+        "single_event",
+        "sequence_episode",
+        "local",
+        "regional",
+        "continental_global",
+        "planetary",
+        "not_applicable"
+      ]
+    },
+    "time_design": {
+      "enum": [
+        "snapshot",
+        "time_lapse",
+        "historical_paleo",
+        "real_time",
+        "not_applicable"
+      ]
+    },
+    "data_origin": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "new_acquisition",
+          "existing_archive",
+          "reanalysis",
+          "synthetic_only",
+          "not_stated"
+        ]
+      }
+    },
+    "focal_events": {
+      "type": "array",
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "tectonic_settings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "subduction_zone",
+          "continental_collision",
+          "continental_transform",
+          "oceanic_transform",
+          "mid_ocean_ridge",
+          "continental_rift_extension",
+          "hotspot_intraplate_volcanism",
+          "stable_continental_interior",
+          "passive_margin",
+          "oceanic_intraplate",
+          "deep_interior",
+          "global_multi",
+          "planetary",
+          "not_applicable",
+          "not_stated"
+        ]
+      }
+    },
+    "study_area": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evidence": {
+      "type": "string"
+    }
+  }
+}

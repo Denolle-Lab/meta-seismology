@@ -1,0 +1,158 @@
+axis,value,label,side,order,definition
+target,source,Source,,0,"Characterizes seismic sources (occurrence, size, mechanism, rupture, physics)."
+target,structure,Structure,,1,"Infers medium properties (velocity, attenuation, anisotropy, interfaces, temporal change)."
+link,joint_estimation,Joint estimation,,2,One inversion estimates source and structure parameters together.
+link,structure_informs_source,Structure → source,,3,Structure results used to obtain or interpret source results.
+link,source_informs_structure,Source → structure,,4,Source results used to obtain or interpret structure results.
+link,source_changes_structure,Source changes medium,,5,Events change the medium and the study measures it.
+link,parallel,Parallel,,6,Both analyzed and interpreted side by side.
+source_type,tectonic,Tectonic EQ,,7,Natural tectonic earthquakes.
+source_type,induced,Induced EQ,,8,"Injection/extraction, hydraulic fracturing, geothermal, reservoir, CO2 storage."
+source_type,mining,Mining,,9,"Mining-induced events, rockbursts."
+source_type,volcanic,Volcanic,,10,"VT, LP, VLP, volcanic tremor, eruption signals."
+source_type,slow_tremor_lfe,Tremor/LFE/slow slip,,11,"Tectonic tremor, LFEs, VLFEs, slow slip, triggered aseismic slip."
+source_type,explosion,Explosion,,12,"Nuclear, chemical, quarry blasts studied as sources."
+source_type,active_source,Active source,,13,Controlled sources used to probe the medium.
+source_type,ambient_noise,Ambient noise,,14,Diffuse noise wavefield used as a probe.
+source_type,landslide,Landslide,,15,"Landslides, rockfalls, debris flows, turbidity currents."
+source_type,glacial,Glacial,,16,"Icequakes, glacial earthquakes, calving."
+source_type,environmental,Environmental,,17,"Microseism generation, rivers, storms, atmosphere, animals, traffic."
+source_type,planetary,Planetary,,18,"Marsquakes, moonquakes."
+source_type,other_nonearthquake,Other non-EQ,,19,"Impacts, bolides, sonic booms, collapses, other."
+source_type,unspecified,Unspecified source,,20,Cannot tell.
+method_family,detection_cataloging,Detection & cataloging,source,21,"Event detection, template matching, repeaters, catalog building."
+method_family,phase_picking_association,Picking & association,source,22,"Phase/polarity picking, phase association."
+method_family,location,Location,source,23,"Absolute/relative location, relocation, tremor/source location."
+method_family,magnitude_size,Magnitude & size,source,24,"Magnitude, moment, yield, size, EEW magnitude."
+method_family,mechanism_moment_tensor,Mechanism & MT,source,25,"Focal mechanisms, moment tensors, source type."
+method_family,source_spectra_energy,Source spectra & energy,source,26,"Corner frequency, stress drop, radiated energy, scaling."
+method_family,rupture_kinematics,Rupture kinematics,source,27,"Finite-fault slip, back-projection, STF, directivity, rupture speed."
+method_family,geodetic_tsunami_deformation,Geodetic/tsunami deformation,source,28,Coseismic/postseismic/slow-slip deformation and slip from geodetic or tsunami data.
+method_family,seismicity_statistics_forecasting,Seismicity statistics & forecasting,source,29,"b-value, completeness, rates, ETAS, declustering, forecasting."
+method_family,seismicity_patterns,Seismicity patterns,source,30,"Descriptive spatiotemporal patterns, migration, swarms."
+method_family,stress_triggering,Stress & triggering,source,31,"Static/dynamic/poroelastic stress change, triggering."
+method_family,stress_field,Stress field,source,32,"Stress tensor inversion, stress state."
+method_family,event_classification,Event classification,source,33,"Classification, discrimination, signal characterization."
+method_family,rupture_cycle_simulation,Rupture/cycle simulation,source,34,Dynamic rupture or earthquake-cycle simulation constrained by observations.
+method_family,paleo_historical,Paleo & historical,source,35,"Paleoseismology, historical and macroseismic analysis."
+method_family,nonearthquake_source_modeling,Non-EQ source modeling,source,36,"Physical modeling of landslide, glacial, eruption, environmental sources."
+method_family,body_wave_tomography,Body-wave tomography,structure,37,"Travel-time or finite-frequency body-wave tomography, Vp/Vs."
+method_family,surface_wave_tomography,Surface-wave tomography,structure,38,Surface-wave dispersion and tomography from earthquakes or ambient noise.
+method_family,waveform_inversion_modeling,Waveform inversion & modeling,structure,39,"FWI, adjoint tomography, waveform forward modeling of structure."
+method_family,interface_imaging,Interface imaging (RF etc.),structure,40,"Receiver functions, CCP, H-kappa, SS/PP precursors, autocorrelation."
+method_family,deep_earth_phases_modes,Deep-Earth phases & modes,structure,41,"Core and lowermost-mantle phases, inner core, normal modes."
+method_family,anisotropy,Anisotropy,structure,42,"Shear-wave splitting, anisotropic tomography or receiver functions."
+method_family,attenuation_scattering,Attenuation & scattering,structure,43,"Q, scattering, coda analysis."
+method_family,temporal_medium_change,Temporal medium change,structure,44,dv/v and other temporal changes of medium properties.
+method_family,active_source_imaging,Active-source imaging,structure,45,"Reflection/refraction/wide-angle profiling, migration, refraction tomography."
+method_family,near_surface_characterization,Near-surface characterization,structure,46,"H/V, SPAC/MASW, shallow Vs, sediment thickness."
+method_family,fault_zone_structure,Fault-zone structure,structure,47,"Fault geometry from seismicity or imaging, fault-zone waves, damage zones."
+method_family,structure_interpretation,Structure interpretation,structure,48,Interpretation of seismic models; geodynamic/rock-physics modeling constrained by seismic data.
+method_family,joint_geophysical_inversion,Joint geophysical inversion,structure,49,Joint inversion of seismic with non-seismic data for structure.
+method_family,other,Other method,either,50,Anything else.
+magnitude,micro,M < 2,,51,"Representative magnitude below 2, or 'micro' descriptor."
+magnitude,small,M 2–4,,52,"Representative magnitude 2 to 4, or 'small'."
+magnitude,moderate,M 4–6,,53,"Representative magnitude 4 to 6, or 'moderate'."
+magnitude,large,M 6–8,,54,"Representative magnitude 6 to 8, or 'large'."
+magnitude,great,M ≥ 8,,55,"Representative magnitude 8 or larger, or 'great'."
+magnitude,active_source,Active source (no M),,56,Controlled sources; magnitude not applicable.
+magnitude,ambient_noise,Ambient noise (no M),,57,Noise wavefield; magnitude not applicable.
+magnitude,continuous_other,Continuous/other (no M),,58,Continuous signals or non-seismic data; magnitude not applicable.
+magnitude,not_stated,Magnitude not stated,,59,Discrete events but no magnitude information.
+distance,near_source,Near-source,,60,Within a few km or the source dimension.
+distance,local,Local,,61,Up to ~200 km.
+distance,regional,Regional,,62,~200–2000 km (<= ~20 deg).
+distance,teleseismic,Teleseismic,,63,">= ~20–30 deg, global data, core phases."
+distance,not_stated,Distance not stated,,64,Not stated or not inferable.
+distance,not_applicable,Distance n/a,,65,Non-seismic data only.
+sensor,broadband,Broadband,,66,Broadband seismometers.
+sensor,short_period,Short-period,,67,Short-period seismometers or geophones (not nodes).
+sensor,nodal_geophone,Nodal geophones,,68,"Autonomous nodes, large-N geophone arrays."
+sensor,strong_motion,Strong motion,,69,"Accelerometers, strong-motion networks."
+sensor,das_fiber,DAS / fiber,,70,DAS and other fiber-optic sensing.
+sensor,rotational,Rotational,,71,"Rotational sensors, ring lasers."
+sensor,low_cost_mems,Low-cost / MEMS,,72,"MEMS, Raspberry Shake, smartphones, citizen sensors."
+sensor,hydroacoustic,Hydroacoustic,,73,"Hydrophones, floats (MERMAID)."
+sensor,infrasound,Infrasound,,74,"Infrasound sensors, barometers, microphones."
+sensor,gnss,GNSS,,75,"GNSS, high-rate GNSS."
+sensor,insar_remote_sensing,InSAR / remote sensing,,76,"InSAR, optical/LiDAR imagery."
+sensor,strain_tilt,Strain / tilt,,77,"Strainmeters, tiltmeters, creepmeters."
+sensor,gravity,Gravity,,78,"Gravimeters, PEGS, satellite gravity."
+sensor,ocean_pressure_tide,Ocean pressure / tide,,79,"Tide gauges, DART, ocean-bottom pressure."
+sensor,analog_historical,Analog / historical,,80,Historical or analog seismograms.
+sensor,seismometer_unspecified,Seismometer (type n/s),,81,Seismic stations of unstated type.
+sensor,other,Other sensor,,82,Other instruments.
+environment,land_surface,Land surface,,83,Surface installations on land.
+environment,borehole,Borehole,,84,"Downhole sensors, vertical arrays."
+environment,ocean_bottom,Ocean bottom,,85,"OBS, seafloor cables or geodesy."
+environment,ocean_water,Ocean water column,,86,"Floats, moored hydrophones."
+environment,underground,Underground,,87,"Mines, tunnels, underground labs."
+environment,cryosphere,Ice / glacier,,88,Installations on ice or glaciers.
+environment,urban,Urban,,89,Urban setting stressed in the text.
+environment,planetary,Planetary,,90,"Mars, Moon, other bodies."
+environment,airborne_space,Airborne / space,,91,"Balloons, satellites."
+environment,not_stated,Environment not stated,,92,Not stated.
+deployment,permanent,Permanent network,,93,"Permanent local/regional/national networks, observatories."
+deployment,global,Global network,,94,Global networks or global datasets.
+deployment,temporary_campaign,Temporary campaign,,95,Planned temporary deployments (incl. rolling arrays).
+deployment,rapid_response,Rapid response,,96,Deployed after an event or unrest.
+deployment,industry_monitoring,Industry monitoring,,97,"Operator monitoring of injection, geothermal, mining, storage."
+deployment,opportunistic,Opportunistic,,98,"Infrastructure not built for seismology (telecom fiber, phones)."
+deployment,mission,Planetary mission,,99,Planetary missions.
+deployment,archival,Archival,,100,Historical/analog archives.
+deployment,not_stated,Deployment not stated,,101,Not stated.
+density,single_station,Single station,,102,One station.
+density,sparse,Sparse (≥100 km),,103,Typical spacing >= ~100 km.
+density,regional,Regional (10–100 km),,104,Typical spacing ~10–100 km.
+density,dense,Dense (1–10 km),,105,Typical spacing ~1–10 km.
+density,ultra_dense,Ultra-dense (≤1 km),,106,"Large-N nodes, DAS channels, small-aperture arrays."
+density,not_stated,Density not stated,,107,Not stated.
+data_type,seismic_waveform,Seismic waveforms,,108,"Seismograms, spectra, noise correlations, DAS, strong motion."
+data_type,seismic_phase_catalog,Picks / catalogs,,109,"Existing picks, travel times, catalogs."
+data_type,seismic_model,Seismic models,,110,Existing seismic models.
+data_type,geodetic,Geodetic,,111,"GNSS, InSAR, other geodetic data."
+data_type,tsunami,Tsunami,,112,Tsunami records.
+data_type,geologic,Geologic,,113,"Field, paleoseismic, geochronologic data."
+data_type,macroseismic_historical,Macroseismic / historical,,114,"Intensity reports, historical documents."
+data_type,other,Other data,,115,Other data.
+data_type,unspecified,Data unspecified,,116,Not stated.
+study_type,application,Application,,117,Applies existing methods to real data.
+study_type,method_development,Method development,,118,Proposes or benchmarks an analysis method.
+study_type,catalog_dataset,Catalog / dataset / model,,119,"Main product is a catalog, dataset, or reference model."
+contribution,observation,Observation & discovery,,120,"Characterizes what is observed: structures, events, regions, new phenomena."
+contribution,explanation,Explanation & testing,,121,"Main result is a cause, mechanism, or tested hypothesis."
+contribution,synthesis,Synthesis,,122,"Generalizes across many events, regions, or studies."
+contribution,method,Method,,123,"Proposes, improves, benchmarks, or calibrates an analysis method."
+contribution,resource_operations,Resource & operations,,124,"Catalogs, datasets, models, software, monitoring and real-time operations."
+spatial_scope,single_event,Single event,,125,One earthquake or discrete event.
+spatial_scope,sequence_episode,Sequence / episode,,126,"One sequence, swarm, eruption, or slow-slip episode."
+spatial_scope,local,Local area,,127,"One site, fault zone, volcano, or area up to ~100 km."
+spatial_scope,regional,Region,,128,One region ~100-2000 km.
+spatial_scope,continental_global,Continental / global,,129,Continental to global scale or many regions.
+spatial_scope,planetary,Planetary body,,130,Another planetary body.
+spatial_scope,not_applicable,Scope n/a,,131,No geographic study area.
+time_design,snapshot,Snapshot,,132,One time window treated as static.
+time_design,time_lapse,Time-lapse,,133,Tracks change over time.
+time_design,historical_paleo,Historical / paleo,,134,"Historical records, paleoseismology, decades-long archives."
+time_design,real_time,Real-time,,135,Real-time or near-real-time processing.
+time_design,not_applicable,Time n/a,,136,No time dimension.
+data_origin,new_acquisition,New data acquisition,,137,Instruments deployed or data collected for the study.
+data_origin,existing_archive,Existing archive,,138,Existing networks or public archives.
+data_origin,reanalysis,Reanalysis of published results,,139,"Published catalogs, models, or results reanalyzed."
+data_origin,synthetic_only,Synthetic only,,140,Synthetic data or simulations only.
+data_origin,not_stated,Data origin n/s,,141,Cannot be told.
+tectonic_setting,subduction_zone,Subduction zone,,142,"Megathrust, forearc, slab, arc, back-arc."
+tectonic_setting,continental_collision,Continental collision,,143,Collision zones and intracontinental orogens.
+tectonic_setting,continental_transform,Continental transform,,144,Continental strike-slip plate boundaries.
+tectonic_setting,oceanic_transform,Oceanic transform,,145,Oceanic transform faults and fracture zones.
+tectonic_setting,mid_ocean_ridge,Mid-ocean ridge,,146,Spreading ridges.
+tectonic_setting,continental_rift_extension,Continental rift / extension,,147,Continental rifts and extensional provinces.
+tectonic_setting,hotspot_intraplate_volcanism,Hotspot / intraplate volcanism,,148,"Hotspots, plumes, intraplate volcanism."
+tectonic_setting,stable_continental_interior,Stable continental interior,,149,"Cratons, platforms, intraplate basins incl. failed rifts."
+tectonic_setting,passive_margin,Passive margin,,150,Passive continental margins and their basins.
+tectonic_setting,oceanic_intraplate,Oceanic plate interior,,151,Oceanic plate interiors away from boundaries.
+tectonic_setting,deep_interior,Deep interior,,152,"Lowermost mantle, core, whole-mantle structure."
+tectonic_setting,global_multi,Global / multi-setting,,153,Global studies or compilations across settings.
+tectonic_setting,planetary,Planetary (setting),,154,Other planetary bodies.
+tectonic_setting,not_applicable,Setting n/a,,155,No study area.
+tectonic_setting,not_stated,Setting n/s,,156,Area cannot be identified.

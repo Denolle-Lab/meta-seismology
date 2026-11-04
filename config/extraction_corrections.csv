@@ -1,0 +1,7 @@
+doi,use_index,field,old_value,new_value,reason
+10.1029/2024gl113879,0,target,source,structure,Codebook rule: viscosity inferred from postseismic deformation is a structure result; this paper estimates asthenospheric Maxwell and Kelvin viscosities
+10.1029/2024gl113879,,source_structure_links,[],"[""source_informs_structure""]",Postseismic deformation of the 2001 Arequipa earthquake is used to infer viscosity
+10.1029/2024gl113879,,link_note,null,Postseismic GNSS displacements after the 2001 Arequipa earthquake constrain asthenospheric Burgers viscosities.,Link note for the corrected paper
+10.1029/2023jb026643,2,target,source,both,Codebook rule: viscosity inferred from postseismic deformation is a structure result; the coupled model estimates deep afterslip together with lower-crustal transient and steady-state viscosities
+10.1029/2023jb026643,,source_structure_links,[],"[""joint_estimation""]",One coupled model estimates afterslip and viscosity
+10.1029/2023jb026643,,link_note,null,One coupled model fits deep afterslip on a lower-crustal shear zone and transient and steady-state lower-crustal viscosities.,Link note for the corrected paper

@@ -1,0 +1,491 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "doi",
+    "include",
+    "include_confidence",
+    "exclusion_reason",
+    "screen_note",
+    "study_type",
+    "uses_real_data",
+    "targets",
+    "source_structure_links",
+    "link_note",
+    "source_types",
+    "networks",
+    "method_uses"
+  ],
+  "properties": {
+    "doi": {
+      "type": "string"
+    },
+    "include": {
+      "type": "boolean"
+    },
+    "include_confidence": {
+      "enum": [
+        "high",
+        "low"
+      ]
+    },
+    "exclusion_reason": {
+      "enum": [
+        null,
+        "non_research",
+        "lab",
+        "ground_motion_hazard",
+        "effects_only",
+        "instrument_data",
+        "theory_generic",
+        "non_seismic",
+        "other"
+      ]
+    },
+    "screen_note": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "study_type": {
+      "enum": [
+        null,
+        "application",
+        "method_development",
+        "catalog_dataset"
+      ]
+    },
+    "uses_real_data": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "targets": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "source",
+          "structure"
+        ]
+      },
+      "minItems": 0
+    },
+    "source_structure_links": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "joint_estimation",
+          "structure_informs_source",
+          "source_informs_structure",
+          "source_changes_structure",
+          "parallel"
+        ]
+      },
+      "minItems": 0
+    },
+    "link_note": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_types": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "tectonic",
+          "induced",
+          "mining",
+          "volcanic",
+          "slow_tremor_lfe",
+          "explosion",
+          "active_source",
+          "ambient_noise",
+          "landslide",
+          "glacial",
+          "environmental",
+          "planetary",
+          "other_nonearthquake",
+          "unspecified"
+        ]
+      },
+      "minItems": 0
+    },
+    "networks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "network_raw",
+          "network_names",
+          "sensor_types",
+          "environments",
+          "deployment",
+          "density",
+          "n_stations",
+          "aperture_note",
+          "external_knowledge",
+          "evidence"
+        ],
+        "properties": {
+          "network_raw": {
+            "type": "string"
+          },
+          "network_names": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sensor_types": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "broadband",
+                "short_period",
+                "nodal_geophone",
+                "strong_motion",
+                "das_fiber",
+                "rotational",
+                "low_cost_mems",
+                "hydroacoustic",
+                "infrasound",
+                "gnss",
+                "insar_remote_sensing",
+                "strain_tilt",
+                "gravity",
+                "ocean_pressure_tide",
+                "analog_historical",
+                "seismometer_unspecified",
+                "other"
+              ]
+            },
+            "minItems": 1
+          },
+          "environments": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "land_surface",
+                "borehole",
+                "ocean_bottom",
+                "ocean_water",
+                "underground",
+                "cryosphere",
+                "urban",
+                "planetary",
+                "airborne_space",
+                "not_stated"
+              ]
+            },
+            "minItems": 1
+          },
+          "deployment": {
+            "enum": [
+              "permanent",
+              "global",
+              "temporary_campaign",
+              "rapid_response",
+              "industry_monitoring",
+              "opportunistic",
+              "mission",
+              "archival",
+              "not_stated"
+            ]
+          },
+          "density": {
+            "enum": [
+              "single_station",
+              "sparse",
+              "regional",
+              "dense",
+              "ultra_dense",
+              "not_stated"
+            ]
+          },
+          "n_stations": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "aperture_note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "external_knowledge": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      },
+      "minItems": 0
+    },
+    "method_uses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "method_raw",
+          "software",
+          "method_specificity",
+          "method_short",
+          "method_family",
+          "purpose",
+          "target",
+          "data_types",
+          "source_types",
+          "distance_regimes",
+          "distance_basis",
+          "network_refs",
+          "target_events",
+          "n_events",
+          "mag_context",
+          "mag_text",
+          "mag_min",
+          "mag_max",
+          "mag_type",
+          "mainshock_mag",
+          "mag_relation",
+          "mag_clarity",
+          "mag_qualitative",
+          "mag_ambiguous",
+          "mag_note",
+          "evidence"
+        ],
+        "properties": {
+          "method_raw": {
+            "type": "string"
+          },
+          "software": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "method_specificity": {
+            "enum": [
+              "named",
+              "generic",
+              "implied"
+            ]
+          },
+          "method_short": {
+            "type": "string"
+          },
+          "method_family": {
+            "enum": [
+              "detection_cataloging",
+              "phase_picking_association",
+              "location",
+              "magnitude_size",
+              "mechanism_moment_tensor",
+              "source_spectra_energy",
+              "rupture_kinematics",
+              "geodetic_tsunami_deformation",
+              "seismicity_statistics_forecasting",
+              "seismicity_patterns",
+              "stress_triggering",
+              "stress_field",
+              "event_classification",
+              "rupture_cycle_simulation",
+              "paleo_historical",
+              "nonearthquake_source_modeling",
+              "body_wave_tomography",
+              "surface_wave_tomography",
+              "waveform_inversion_modeling",
+              "interface_imaging",
+              "deep_earth_phases_modes",
+              "anisotropy",
+              "attenuation_scattering",
+              "temporal_medium_change",
+              "active_source_imaging",
+              "near_surface_characterization",
+              "fault_zone_structure",
+              "structure_interpretation",
+              "joint_geophysical_inversion",
+              "other"
+            ]
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "target": {
+            "enum": [
+              "source",
+              "structure",
+              "both"
+            ]
+          },
+          "data_types": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "seismic_waveform",
+                "seismic_phase_catalog",
+                "seismic_model",
+                "geodetic",
+                "tsunami",
+                "geologic",
+                "macroseismic_historical",
+                "other",
+                "unspecified"
+              ]
+            },
+            "minItems": 1
+          },
+          "source_types": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "tectonic",
+                "induced",
+                "mining",
+                "volcanic",
+                "slow_tremor_lfe",
+                "explosion",
+                "active_source",
+                "ambient_noise",
+                "landslide",
+                "glacial",
+                "environmental",
+                "planetary",
+                "other_nonearthquake",
+                "unspecified"
+              ]
+            },
+            "minItems": 1
+          },
+          "distance_regimes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "near_source",
+                "local",
+                "regional",
+                "teleseismic",
+                "not_stated",
+                "not_applicable"
+              ]
+            },
+            "minItems": 1
+          },
+          "distance_basis": {
+            "enum": [
+              "explicit",
+              "inferred",
+              "not_stated"
+            ]
+          },
+          "network_refs": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "minItems": 0
+          },
+          "target_events": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "n_events": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "mag_context": {
+            "enum": [
+              "analyzed_events",
+              "source_events",
+              "not_applicable"
+            ]
+          },
+          "mag_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mag_min": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "mag_max": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "mag_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mainshock_mag": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "mag_relation": {
+            "enum": [
+              "direct",
+              "mainshock_reference",
+              "trigger_reference",
+              "none"
+            ]
+          },
+          "mag_clarity": {
+            "enum": [
+              "explicit",
+              "external_knowledge",
+              "qualitative",
+              "not_stated"
+            ]
+          },
+          "mag_qualitative": {
+            "enum": [
+              null,
+              "micro",
+              "small",
+              "moderate",
+              "large",
+              "great"
+            ]
+          },
+          "mag_ambiguous": {
+            "type": "boolean"
+          },
+          "mag_note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      },
+      "minItems": 0
+    }
+  }
+}

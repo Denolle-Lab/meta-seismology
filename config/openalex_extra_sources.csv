@@ -1,0 +1,2 @@
+journal_key,openalex_source_id,maps_to,doi_regex,note
+JGR-comb,S207178839,JGR-SE,^10\.(1029/\d{4}jb\d|1002/(\d{4}jb\d|jgrb\.\d)),"Pre-2014 JGR is one OpenAlex source (shown as JGR Atmospheres) holding all sections; Solid Earth papers have 'jb' in the DOI"
